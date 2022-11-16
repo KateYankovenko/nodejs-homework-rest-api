@@ -1,19 +1,36 @@
 const { Conflict } = require('http-errors');
 const { User } = require('../../models');
 const gravatar = require('gravatar');
+const { sendEmail } = require('./sendEmail');
+const { v4 } = require('uuid');
 
-const register = async (req, res) => {
+
+const { BASE_URL } = process.env;
+
+const register = async (req, res, next) => {
+
     const { email, password, subscription } = req.body;
+
     const user = await User.findOne({ email });
+
     if (user) {
-        throw new Conflict('Email in use');
+        throw new Conflict('Email in use!');
     }
 
     const avatarURL = gravatar.url(email);
-    
-    const newUser = new User({ email, subscription, avatarURL});
+    const verificationToken = v4();
+    const newUser = new User({ email, subscription, avatarURL, verificationToken });
+
     newUser.setPassword(password);
-    newUser.save();
+    await newUser.save();
+
+    const mail = {
+        to: email,
+        subject: 'Confirm email',
+        html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${verificationToken}">Confirm email!</a>`
+    }
+    await sendEmail(mail);
+    
     
     res.status(201).json({
         status: "created",
@@ -23,6 +40,7 @@ const register = async (req, res) => {
                 email,
                 subscription,
                 avatarURL,
+                verificationToken
             }
         }
     })

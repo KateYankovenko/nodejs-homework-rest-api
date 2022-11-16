@@ -12,5 +12,9 @@ router.patch('/', authMiddleware, validation(updateSubscriptionJoiSchema), ctrlW
 
 router.patch('/avatars', authMiddleware, upload.single("avatar"), ctrlWrapper(ctrl.updateAvatar));
 
+router.get('/verify/:verificationToken', ctrlWrapper(ctrl.verifyEmail));
+
+router.post('/verify', ctrlWrapper(ctrl.resendEmail));
+
 
 module.exports = router;
