@@ -1,7 +1,7 @@
 const { Conflict } = require('http-errors');
 const { User } = require('../../models');
 const gravatar = require('gravatar');
-const { sendEmail } = require('../../helpers');
+const { sendEmail } = require('./sendEmail');
 const { v4 } = require('uuid');
 
 
